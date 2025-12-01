@@ -1,0 +1,374 @@
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-2xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">ICSF Penalty: 0.003</p>
+        
+        
+    
+        
+        
+        
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINA-REI TSLP Dashboard</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the futuristic/serious look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark GitHub background */
+            color: #c9d1d9; /* Light gray text */
+        }
+        .card {
+            background-color: #161b22; /* Slightly lighter inner panel */
+            border: 1px solid #30363d;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+        input[type="number"] {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #58a6ff; /* Blue input text */
+        }
+        .status-box {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        /* Style for the deviation meter */
+        .meter-bar {
+            height: 10px;
+            background: linear-gradient(to right, #22c55e 50%, #f97316 75%, #ef4444 100%);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+    </style>
+<script src="tslp_interactive_script.js"></script></head>
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="w-full max-w-2xl">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-extrabold text-[#58a6ff] md:text-4xl">
+                Teleological System Lock Protocol (TSLP)
+            </h1>
+            <p class="text-lg text-gray-400 mt-2">
+                Project LUMINA-REI: ICSF Constraint Dashboard
+            </p>
+        </header>
+
+        <!-- Main Dashboard Card -->
+        <div class="card p-6 md:p-8 rounded-xl space-y-8">
+            
+            <!-- Ideal G-State -->
+            <div class="text-center border-b border-gray-700 pb-4">
+                <h2 class="text-xl font-semibold text-green-400">G-STATE (Goal Vector)</h2>
+                <p id="g-state" class="text-3xl font-mono mt-1 text-green-300">(3.0, 6.0, 9.0)</p>
+            </div>
+
+            <!-- Input Vector -->
+            <div>
+                <h2 class="text-xl font-semibold mb-3 text-yellow-300">CURRENT SYSTEM VECTOR (Rei)</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <label class="block">
+                        <span class="text-gray-400 text-sm">V1 (Ideal: 3.0)</span>
+                        <input type="number" id="v1" value="3.0" step="0.1" class="w-full rounded-lg p-2 mt-1 focus:ring-[#58a6ff] focus:border-[#58a6ff]">
+                    </label>
+                    <label class="block">
+                        <span class="text-gray-400 text-sm">V2 (Ideal: 6.0)</span>
+                        <input type="number" id="v2" value="6.0" step="0.1" class="w-full rounded-lg p-2 mt-1 focus:ring-[#58a6ff] focus:border-[#58a6ff]">
+                    </label>
+                    <label class="block">
+                        <span class="text-gray-400 text-sm">V3 (Ideal: 9.0)</span>
+                        <input type="number" id="v3" value="9.0" step="0.1" class="w-full rounded-lg p-2 mt-1 focus:ring-[#58a6ff] focus:border-[#58a6ff]">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Calculation Button -->
+            <button onclick="calculateTSLP()" 
+                    class="w-full py-3 rounded-xl bg-[#58a6ff] hover:bg-blue-600 text-white font-bold transition duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
+                INITIATE TSLP CHECK
+            </button>
+            
+            <!-- Results Area -->
+            <div class="space-y-4 pt-4 border-t border-gray-700">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-medium">ICSF Penalty Score:</span>
+                    <span id="penalty-output" class="text-2xl font-mono text-pink-400">0.0000</span>
+                </div>
+
+                <!-- TSLP Status -->
+                <div class="status-box p-3 rounded-lg text-center" id="status-box">
+                    SYSTEM_ALIGNED
+                </div>
+
+                <!-- Deviation Meter -->
+                <div>
+                    <span class="text-sm text-gray-500">Deviation Meter (Lock Limit: 1.0)</span>
+                    <div class="meter-bar mt-1">
+                        <div id="meter-fill" class="h-full rounded-full" style="width: 0%; background-color: #22c55e;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Logic - THIS IS THE CRITICAL PART -->
+    <script>
+        // Global G-STATE and Lock Limit Configuration
+        const G_STATE = [3.0, 6.0, 9.0];
+        const TSLP_LOCK_LIMIT = 1.0;
+        
+        // Initial setup for input fields to trigger calculation on change
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('v1').addEventListener('input', calculateTSLP);
+            document.getElementById('v2').addEventListener('input', calculateTSLP);
+            document.getElementById('v3').addEventListener('input', calculateTSLP);
+            calculateTSLP(); // Run initial calculation
+        });
+
+        // The core ICSF function, ported directly from icsf_lock.py
+        function calculate_tslp_constraint(input_vector) {
+            let total_penalty = 0;
+            
+            for (let i = 0; i < G_STATE.length; i++) {
+                const ideal_value = G_STATE[i];
+                const current_value = input_vector[i];
+                
+                // 1. Calculate the absolute deviation (d)
+                const deviation = Math.abs(current_value - ideal_value);
+                
+                // 2. Apply the Immutable Cubic State Function (ICSF): d^3
+                const cubic_penalty = Math.pow(deviation, 3);
+                
+                // 3. Sum the individual penalties
+                total_penalty += cubic_penalty;
+            }
+            
+            return total_penalty;
+        }
+
+        // The TSLP Executor Logic
+        function calculateTSLP() {
+            // 1. Get current input values (and ensure they are treated as numbers)
+            const v1 = parseFloat(document.getElementById('v1').value) || 0;
+            const v2 = parseFloat(document.getElementById('v2').value) || 0;
+            const v3 = parseFloat(document.getElementById('v3').value) || 0;
+            const current_vector = [v1, v2, v3];
+
+            // 2. Calculate Penalty
+            const penalty = calculate_tslp_constraint(current_vector);
+            
+            // 3. Update Dashboard Elements
+            document.getElementById('penalty-output').textContent = penalty.toFixed(4);
+            
+            const statusBox = document.getElementById('status-box');
+            const meterFill = document.getElementById('meter-fill');
+            
+            // 4. Implement Decision Logic
+            let status = '';
+            
+            if (penalty > TSLP_LOCK_LIMIT) {
+                status = 'TSLP_LOCKOUT_INITIATED';
+                statusBox.className = 'status-box p-3 rounded-lg text-center bg-red-800 text-red-300 animate-pulse';
+            } else {
+                status = 'SYSTEM_ALIGNED';
+                statusBox.className = 'status-box p-3 rounded-lg text-center bg-green-700 text-green-200';
+            }
+            
+            statusBox.textContent = status;
+            
+            // 5. Update Deviation Meter
+            const maxMeterValue = 2.0; // Show up to 2.0 on the meter for visual clarity
+            let meterPercentage = (penalty / maxMeterValue) * 100;
+            
+            if (meterPercentage > 100) {
+                meterPercentage = 100;
+                meterFill.style.backgroundColor = '#ef4444'; // Solid Red for extreme deviation
+            } else if (meterPercentage > 50) {
+                 meterFill.style.backgroundColor = '#f97316'; // Orange/Warning color
+            } else {
+                 meterFill.style.backgroundColor = '#22c55e'; // Green/Aligned color
+            }
+
+            meterFill.style.width = `${meterPercentage}%`;
+        }
+    </script>
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">ICSF Penalty: 0.003</p>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">Total ICSF Penalty: 0.003</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-green-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-green-200">V1 Deviation (D1³): 0.001</p>
+                <p class="text-md text-green-200">V2 Deviation (D2³): 0.001</p>
+                <p class="text-md text-green-200">V3 Deviation (D3³): 0.001</p>
+            </div>
+        </div>
+    
+
+    <div id="tslp-input" class="p-6 bg-gray-800 shadow-xl rounded-xl mt-8">
+        <h3 class="text-xl text-white font-bold mb-4">Diagnostic Vector Input (Simulator)</h3>
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <input type="number" id="v1_input" placeholder="V1 (Ideal: 3.0)" value="3.1" class="p-2 border rounded text-gray-900">
+            <input type="number" id="v2_input" placeholder="V2 (Ideal: 6.0)" value="6.1" class="p-2 border rounded text-gray-900">
+            <input type="number" id="v3_input" placeholder="V3 (Ideal: 9.0)" value="9.1" class="p-2 border rounded text-gray-900">
+        </div>
+        <button onclick="calculateICSF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded">Run TSLP Analysis</button>
+    </div>
+
+
+        <div id="tslp-report" class="card p-6 bg-red-700 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-red-200">CRITICAL LOCKOUT INITIATED</h2>
+            <p class="mt-2 text-xl text-red-200">Total ICSF Penalty: 343.000</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-red-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-red-200">V1 Deviation (D1³): 343.000</p>
+                <p class="text-md text-red-200">V2 Deviation (D2³): 0.000</p>
+                <p class="text-md text-red-200">V3 Deviation (D3³): 0.000</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">Total ICSF Penalty: 0.003</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-green-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-green-200">V1 Deviation (D1³): 0.001</p>
+                <p class="text-md text-green-200">V2 Deviation (D2³): 0.001</p>
+                <p class="text-md text-green-200">V3 Deviation (D3³): 0.001</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">Total ICSF Penalty: 0.003</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-green-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-green-200">V1 Deviation (D1³): 0.001</p>
+                <p class="text-md text-green-200">V2 Deviation (D2³): 0.001</p>
+                <p class="text-md text-green-200">V3 Deviation (D3³): 0.001</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">Total ICSF Penalty: 0.003</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-green-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-green-200">V1 Deviation (D1³): 0.001</p>
+                <p class="text-md text-green-200">V2 Deviation (D2³): 0.001</p>
+                <p class="text-md text-green-200">V3 Deviation (D3³): 0.001</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-red-700 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-red-200">CRITICAL LOCKOUT INITIATED</h2>
+            <p class="mt-2 text-xl text-red-200">Total ICSF Penalty: 343.000</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-red-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-red-200">V1 Deviation (D1³): 343.000</p>
+                <p class="text-md text-red-200">V2 Deviation (D2³): 0.000</p>
+                <p class="text-md text-red-200">V3 Deviation (D3³): 0.000</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">Total ICSF Penalty: 0.003</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-green-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-green-200">V1 Deviation (D1³): 0.001</p>
+                <p class="text-md text-green-200">V2 Deviation (D2³): 0.001</p>
+                <p class="text-md text-green-200">V3 Deviation (D3³): 0.001</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-green-200">System Alignment Confirmed</h2>
+            <p class="mt-2 text-xl text-green-200">Total ICSF Penalty: 0.003</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-green-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-green-200">V1 Deviation (D1³): 0.001</p>
+                <p class="text-md text-green-200">V2 Deviation (D2³): 0.001</p>
+                <p class="text-md text-green-200">V3 Deviation (D3³): 0.001</p>
+            </div>
+        </div>
+    
+
+
+        <div id="tslp-report" class="card p-6 bg-red-700 shadow-xl rounded-xl">
+            <h2 class="text-3xl font-bold text-red-200">CRITICAL LOCKOUT INITIATED</h2>
+            <p class="mt-2 text-xl text-red-200">Total ICSF Penalty: 343.000</p>
+            <div class="mt-4 pt-4 border-t border-opacity-30 border-current">
+                <h3 class="text-lg font-semibold text-red-200">Cubic Penalty Breakdown:</h3>
+                <p class="text-md text-red-200">V1 Deviation (D1³): 343.000</p>
+                <p class="text-md text-red-200">V2 Deviation (D2³): 0.000</p>
+                <p class="text-md text-red-200">V3 Deviation (D3³): 0.000</p>
+            </div>
+        </div>
+    
+
+</body>
+<div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+    <h2 class="text-3xl font-bold text-green-200">System Aligned</h2>
+    <p class="mt-2 text-xl text-green-200">ICSF Penalty: 0.003</p>
+</div>
+
+<div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+    <h2 class="text-3xl font-bold text-green-200">System Aligned</h2>
+    <p class="mt-2 text-xl text-green-200">ICSF Penalty: 0.003</p>
+</div>
+
+<div id="tslp-report" class="card p-6 bg-green-600 shadow-xl rounded-xl">
+    <h2 class="text-3xl font-bold text-green-200">System Aligned</h2>
+    <p class="mt-2 text-xl text-green-200">ICSF Penalty: 0.003</p>
+</div>
+
+<div id="tslp-report" class="card p-6 bg-red-700 shadow-xl rounded-xl">
+    <h2 class="text-3xl font-bold text-red-200">Lockout Triggered</h2>
+    <p class="mt-2 text-xl text-red-200">ICSF Penalty: 0.003</p>
+</div>
+
+<div id="tslp-report" class="card p-6 bg-red-700 shadow-xl rounded-xl">
+    <h2 class="text-3xl font-bold text-red-200">Lockout Triggered</h2>
+    <p class="mt-2 text-xl text-red-200">ICSF Penalty: 0.003</p>
+</div>
+
+<div id="tslp-report" class="card p-6 bg-red-700 shadow-xl rounded-xl">
+    <h2 class="text-3xl font-bold text-red-200">Lockout Triggered</h2>
+    <p class="mt-2 text-xl text-red-200">ICSF Penalty: 408.000</p>
+</div>
+<!-- TSLP_INJECTION_POINT -->
+
+
+
+
+
+
+</html>
+

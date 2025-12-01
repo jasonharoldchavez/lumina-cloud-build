@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+import smtplib
+import json
+from email.mime.text import MIMEText
+from pathlib import Path
+6
+# ----------------------------------------------------
+# CONFIGURATION
+# ----------------------------------------------------
+YOUR_EMAIL = "chavezjason950@gmail.com"
+YOUR_APP_PASSWORD = srcw dhfr zpeu kmjo-"   # ← replace ONLY these dashes with your Gmail App Password
+
+# ----------------------------------------------------
+# LOAD REPORT
+# ----------------------------------------------------
+report_path = Path.home() / "downloads" / "atlas_project" / "out" / "report_demo01.json"
+report = json.loads(report_path.read_text())
+score = report["alignment_score"]
+
+# ----------------------------------------------------
+# SEND ALERT
+# ----------------------------------------------------
+def send_alert(score):
+    subject = "TSLP ALERT — Critical Status"
+    body = f"Your project score dropped to {score}. Check your dashboard immediately."
+
+    msg = MIMEText(body)
+    msg["From"] = YOUR_EMAIL
+    msg["To"] = YOUR_EMAIL
+    msg["Subject"] = subject
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(YOUR_EMAIL, YOUR_APP_PASSWORD)
+        server.sendmail(YOUR_EMAIL, YOUR_EMAIL, msg.as_string())
+
+
+# ----------------------------------------------------
+# TRIGGER ALERT
+# ----------------------------------------------------
+if score < 50:
+    send_alert(score)
+    print("Alert sent!")
+else:
+    print("No alert needed.")

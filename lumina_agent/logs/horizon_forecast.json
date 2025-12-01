@@ -1,0 +1,12 @@
+{
+  "generated": "2025-11-29T22:45:57.828573",
+  "current_vector": [
+    3.1,
+    6.1,
+    9.1
+  ],
+  "current_penalty": 0.2999999999999994,
+  "drift_mean": 0.0,
+  "projected_penalty_in_3": 0.2999999999999994,
+  "projected_state_in_3": "TSLP_ALIGNED"
+}

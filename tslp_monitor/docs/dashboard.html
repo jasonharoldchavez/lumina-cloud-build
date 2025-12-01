@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+import yagmail
+import json
+from pathlib import Path
+
+Path to the report produced by transcend_sim.py
+
+report_path = Path.home() / "downloads" / "atlas_project" / "out" / "report_demo01.json"
+
+Load the report
+
+report = json.loads(report_path.read_text())
+score = report["alignment_score"]
+
+-------- CONFIGURE THIS BEFORE RUNNING --------
+
+YOUR_EMAIL = "YOUR_EMAIL@gmail.com"
+YOUR_APP_PASSWORD = "YOUR_GOOGLE_APP_PASSWORD"
+
+-----------------------------------------------
+
+if score < 60:
+yag = yagmail.SMTP(YOUR_EMAIL, YOUR_APP_PASSWORD)
+yag.send(
+YOUR_EMAIL,
+"TSLP ALERT — Critical Status",
+f"Your project score dropped to {score}. Check dashboard immediately."
+)
+print("Alert sent!")
+else:
+print("No alert needed.")

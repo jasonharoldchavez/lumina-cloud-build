@@ -1,0 +1,33 @@
+[2025-11-29 13:49:41] ERROR: no current_vector.txt
+[2025-11-29 13:51:16] PLUGIN_LOAD_ERROR: reaction_engine -> name '__file__' is not defined
+[2025-11-29 13:51:16] ERROR: no current_vector.txt
+[2025-11-29 13:52:44] PLUGIN_LOAD_ERROR: reaction_engine -> name '__file__' is not defined
+[2025-11-29 13:52:44] STATE: TSLP_LOCKOUT_INITIATED | TOTAL_PENALTY: 343.0 | V1_P:343.0 | V2_P:0.0 | V3_P:0.0
+[2025-11-29 13:52:44] DASHBOARD_UPDATED -> /data/data/com.termux/files/home/lumina_agent/dashboard/index.html
+[2025-11-29 13:55:39] PLUGIN_LOAD_ERROR: reaction_engine -> name '__file__' is not defined
+[2025-11-29 13:55:39] PLUGIN_LOADED: predictive_horizon
+[2025-11-29 13:55:39] STATE: TSLP_LOCKOUT_INITIATED | TOTAL_PENALTY: 343.0 | V1_P:343.0 | V2_P:0.0 | V3_P:0.0
+[2025-11-29 13:55:39] DASHBOARD_UPDATED -> /data/data/com.termux/files/home/lumina_agent/dashboard/index.html
+[2025-11-29 14:00:12] PLUGIN_LOAD_ERROR: reaction_engine -> name '__file__' is not defined
+[2025-11-29 14:00:12] PLUGIN_LOADED: predictive_horizon
+[2025-11-29 14:00:12] STATE: TSLP_LOCKOUT_INITIATED | TOTAL_PENALTY: 343.0 | V1_P:343.0 | V2_P:0.0 | V3_P:0.0
+[2025-11-29 14:00:12] DASHBOARD_UPDATED -> /data/data/com.termux/files/home/lumina_agent/dashboard/index.html
+[2025-11-29 14:53:38] STATE: TSLP_ALIGNED | TOTAL_PENALTY: 0.2999999999999994
+[2025-11-29 15:04:26] STATE: TSLP_ALIGNED | TOTAL_PENALTY: 0.2999999999999994
+[REACTION] Housekeeping -> /data/data/com.termux/files/home/lumina_agent/actions/1764453866_housekeeping.json
+[HORIZON] updated: penalty=0.2999999999999994 projected=0.30
+[CLAIRVOYANCE] intent=0.270 future=Likely Stable
+[SYMBOLIC] chain=3-6-9 state=TSLP_ALIGNED penalty=0.2999999999999994
+[2025-11-29 15:40:12] STATE: TSLP_ALIGNED | TOTAL_PENALTY: 0.2999999999999994
+[REACTION] Housekeeping -> /data/data/com.termux/files/home/lumina_agent/actions/1764456012_housekeeping.json
+[HORIZON] updated: penalty=0.2999999999999994 projected=0.30
+[CLAIRVOYANCE] intent=0.270 future=Likely Stable
+[SYMBOLIC] chain=3-6-9 state=TSLP_ALIGNED penalty=0.2999999999999994
+[ADAPT] actual=0.300 pred=0.000 action=OK
+[2025-11-29 15:45:57] STATE: TSLP_ALIGNED | TOTAL_PENALTY: 0.2999999999999994
+[REACTION] Housekeeping -> /data/data/com.termux/files/home/lumina_agent/actions/1764456357_housekeeping.json
+[HORIZON] updated: penalty=0.2999999999999994 projected=0.30
+[CLAIRVOYANCE] intent=0.270 future=Likely Stable
+[SYMBOLIC] chain=3-6-9 state=TSLP_ALIGNED penalty=0.2999999999999994
+[ADAPT] actual=0.300 pred=0.054 action=OK
+[PATTERN] found 1 pattern(s): cycle
