@@ -16,17 +16,34 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'
+
+      - name: Install Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Install Cordova
         run: npm install -g cordova
 
       - name: Install project dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build Android APK
+      - name: Add Android platform only if missing
         run: |
-          cordova platform add android
-          cordova build android --release
+          if [ ! -d "platforms/android" ]; then
+            echo "Adding Android platform..."
+            cordova platform add android
+          else
+            echo "Android platform already exists — skipping add"
+          fi
+
+      - name: Build release APK
+        run: cordova build android --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
