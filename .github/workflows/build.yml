@@ -18,7 +18,7 @@ jobs:
           node-version: 18
           cache: 'npm'
 
-      - name: Install Java JDK
+      - name: Install Java JDK (Required for Android)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -27,11 +27,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Cordova
-        run: npm install -g cordova
-
-      - name: Install project dependencies
-        run: npm ci
+      - name: Install Cordova and dependencies
+        run: |
+          npm install -g cordova
+          npm ci
 
       - name: Add Android platform only if missing
         run: |
@@ -42,11 +41,24 @@ jobs:
             echo "Android platform already exists — skipping add"
           fi
 
-      - name: Build release APK
+      - name: Build release APK (Unsigned)
         run: cordova build android --release
 
-      - name: Upload APK artifact
+      - name: Sign Android Release APK
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: platforms/android/app/build/outputs/apk/release
+          # Pulling secrets from GitHub Settings
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      
+      - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lumina-cloud-build-apk
-          path: platforms/android/app/build/outputs/apk/release/*.apk
+          name: lumina-signed-apk
+          # Path to the final, signed APK file output by the signing action
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+
