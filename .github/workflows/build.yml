@@ -48,8 +48,8 @@ jobs:
         id: sign_app
         uses: r0adkll/sign-android-release@v1
         with:
-          # CORRECTED PATH: Use the parent directory to find the APK
-          releaseDirectory: platforms/android/app/build/outputs/apk
+          # CORRECTED PATH: Points to the directory containing the app-release.aab file
+          releaseDirectory: platforms/android/app/build/outputs/bundle/release
           
           # Pulling secrets from GitHub Settings
           signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -57,11 +57,9 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
       
-      - name: Upload Signed APK Artifact
+      - name: Upload Signed AAB Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lumina-signed-apk
-          # Path to the final, signed APK file output by the signing action
+          name: lumina-signed-aab
+          # Path to the final, signed AAB file output by the signing action
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}
-
-
