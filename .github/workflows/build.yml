@@ -48,7 +48,9 @@ jobs:
         id: sign_app
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: platforms/android/app/build/outputs/apk/release
+          # CORRECTED PATH: Use the parent directory to find the APK
+          releaseDirectory: platforms/android/app/build/outputs/apk
+          
           # Pulling secrets from GitHub Settings
           signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
@@ -61,4 +63,5 @@ jobs:
           name: lumina-signed-apk
           # Path to the final, signed APK file output by the signing action
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+
 
