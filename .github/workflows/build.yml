@@ -1,8 +1,6 @@
 name: Build Android (Cordova)
 
 on:
-  push:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -10,46 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Install Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Install Android SDK
-        uses: android-actions/setup-sdk@v2
-        with:
-          api-level: 34
-          build-tools: '34.0.0'
-          targets: 'platforms;android-34'
+        uses: android-actions/setup-android@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      - name: Install Cordova
+        run: npm install -g cordova
 
-      - name: Install Cordova & Dependencies
+      - name: Build Android
         run: |
-          npm ci || npm install
-          npm install -g cordova
-
-      - name: Prepare Android platform (Cordova)
-        run: |
-          cordova platform rm android || true
+          npm install
           cordova platform add android
-
-      - name: Build APK
-        run: |
-          cordova build android --debug --no-daemon
-        env:
-          ANDROID_HOME: ${{ steps.setup-sdk.outputs.sdk-path }}
-          ANDROID_SDK_ROOT: ${{ steps.setup-sdk.outputs.sdk-path }}
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          cordova build android --release
