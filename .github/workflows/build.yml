@@ -1,65 +1,55 @@
-name: Android Cloud Build
+name: Build Android (Cordova)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install Java JDK (Required for Android)
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Cordova and dependencies
-        run: |
-          npm install -g cordova
-          npm ci
-
-      - name: Add Android platform only if missing
-        run: |
-          if [ ! -d "platforms/android" ]; then
-            echo "Adding Android platform..."
-            cordova platform add android
-          else
-            echo "Android platform already exists — skipping add"
-          fi
-
-      - name: Build release APK (Unsigned)
-        run: cordova build android --release
-
-      - name: Sign Android Release APK
-        id: sign_app
-        uses: r0adkll/sign-android-release@v1
+      - name: Install Android SDK
+        uses: android-actions/setup-sdk@v2
         with:
-          # CORRECTED PATH: Points to the directory containing the app-release.aab file
-          releaseDirectory: platforms/android/app/build/outputs/bundle/release
-          
-          # Pulling secrets from GitHub Settings
-          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-      
-      - name: Upload Signed AAB Artifact
+          api-level: 34
+          build-tools: '34.0.0'
+          targets: 'platforms;android-34'
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Cordova & Dependencies
+        run: |
+          npm ci || npm install
+          npm install -g cordova
+
+      - name: Prepare Android platform (Cordova)
+        run: |
+          cordova platform rm android || true
+          cordova platform add android
+
+      - name: Build APK
+        run: |
+          cordova build android --debug --no-daemon
+        env:
+          ANDROID_HOME: ${{ steps.setup-sdk.outputs.sdk-path }}
+          ANDROID_SDK_ROOT: ${{ steps.setup-sdk.outputs.sdk-path }}
+
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: lumina-signed-aab
-          # Path to the final, signed AAB file output by the signing action
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          name: app-debug-apk
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
