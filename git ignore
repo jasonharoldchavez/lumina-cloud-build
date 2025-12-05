@@ -1,0 +1,15 @@
+# --- SECURITY: Private Keys & Environment Vars ---
+.bashrc  # Never commit your Termux config
+.env     # If using a separate environment file
+
+# --- AGENT MEMORY & LEARNING DATA ---
+lumina_agent/current_vector.json  # Agent's memory (dynamic)
+lumina_agent/adaptive_bias.json   # Agent's learned bias (dynamic)
+
+# --- LOGS AND OUTPUT DATA ---
+lumina_agent/logs/
+lumina_agent/actions/* # All individual action records
+
+# --- Python Files ---
+*.pyc
+__pycache__/
