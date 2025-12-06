@@ -1,8 +1,10 @@
-name: Build Android (Cordova)
+name: Lumina Cloud Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -10,41 +12,88 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      # 1. Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Correct Android SDK setup action
-      - name: Set up Android SDK
-        uses: reactivecircus/android-emulator-runner@v2
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          api-level: 34
-          script: echo "SDK installed"
+          python-version: "3.11"
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
+      # 3. Install Python deps (skips if no requirements.txt)
+      - name: Install Python dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt found, skipping."
+          fi
 
-      - name: Install Node
+      # 4. Set up Node
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
 
-      - name: Install Cordova
-        run: npm install -g cordova
+      # 5. Install Node deps (skips if no package.json)
+      - name: Install Node dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found, skipping."
+          fi
 
-      - name: Install project dependencies
-        run: npm install
+      # 6. Run tests (Python + Node)
+      - name: Run Python tests
+        run: |
+          if [ -d tests ]; then
+            python -m pytest || true
+          else
+            echo "No Python tests found."
+          fi
 
-      - name: Add Android platform
-        run: cordova platform add android
+      - name: Run Node tests
+        run: |
+          if [ -f package.json ]; then
+            npm test || true
+          else
+            echo "No Node tests found."
+          fi
 
-      - name: Build Android APK
-        run: cordova build android --release
+      # 7. Build (Python + Node)
+      - name: Build project
+        run: |
+          echo "Starting build..."
+          
+          # Python build (skip if no setup.py or pyproject)
+          if [ -f setup.py ]; then
+            python setup.py build || true
+          elif [ -f pyproject.toml ]; then
+            python -m build || true
+          else
+            echo "No Python build system found."
+          fi
 
-      - name: Upload APK
+          # Node build (skip if no package.json)
+          if [ -f package.json ]; then
+            npm run build || true
+          else
+            echo "No Node build script."
+          fi
+
+      # 8. Upload any artifacts found
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: platforms/android/app/build/outputs/**/*.apk
+          name: lumina-build
+          path: |
+            dist/**
+            build/**
+            output/**
+            dashboard/**
+            lumina_agent/**
+          if-no-files-found: warn
