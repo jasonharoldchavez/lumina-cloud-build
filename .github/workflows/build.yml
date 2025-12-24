@@ -68,8 +68,8 @@ jobs:
       - name: Build project
         run: |
           echo "Starting build..."
-          
-          # Python build (skip if no setup.py or pyproject)
+
+          # Python build
           if [ -f setup.py ]; then
             python setup.py build || true
           elif [ -f pyproject.toml ]; then
@@ -78,7 +78,7 @@ jobs:
             echo "No Python build system found."
           fi
 
-          # Node build (skip if no package.json)
+          # Node build
           if [ -f package.json ]; then
             npm run build || true
           else
