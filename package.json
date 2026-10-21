@@ -1,6 +1,6 @@
 {
   "name": "com.lumina.rei",
-  "displayName": "LUMINA_REI",
+  "displayName": "Maker Arcade",
   "version": "1.0.0",
   "description": "Local-first Maker Arcade and Living Atlas interactive science prototype for Cordova Android.",
   "main": "index.js",
