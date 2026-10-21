@@ -36,6 +36,6 @@ test("wave points stay in bounds and respond to frequency/amplitude", () => {
   const points = wavePoints(2, 0.7);
   assert.ok(points.length > 100);
   assert.ok(points.every(([x,y]) => x >= 0 && x <= 600 && y >= 0 && y <= 180));
-  assert.ok(Math.max(...points.map(p => p[1])) < 100);
+  assert.ok(Math.min(...points.map(p => p[1])) < 60);\n  assert.ok(Math.max(...points.map(p => p[1])) > 120);
   assert.throws(() => wavePoints(11, 0.5));
 });
