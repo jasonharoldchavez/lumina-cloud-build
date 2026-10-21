@@ -1,1 +1,28 @@
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:; script-src 'self' 'unsafe-eval';">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Maker Arcade — Living Atlas</title><link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<header class="topbar"><div class="brand-mark" aria-hidden="true">✳</div><div><p class="eyebrow">LIVING ATLAS · LOCAL PROTOTYPE</p><h1>Maker Arcade</h1><p class="tagline">Make something. Keep it. Then explore how the world works.</p></div></header>
+<nav class="tabs" aria-label="Main navigation"><button class="tab active" data-view="explore" aria-selected="true">Explore</button><button class="tab" data-view="labs" aria-selected="false">Interactive labs</button><button class="tab" data-view="saved" aria-selected="false">Saved work <span id="saved-count">0</span></button></nav>
+<main id="app-main">
+<section class="view" id="view-explore"><div class="hero card"><p class="eyebrow">YOUR WORKBENCH</p><h2>Small experiments. Bigger questions.</h2><p>Explore waves, orbital motion, density, and patterns in a local-first workspace. No account, camera, or network connection is required.</p><button class="primary" data-go="labs">Open the labs →</button></div><div class="section-heading"><div><p class="eyebrow">START HERE</p><h2>Choose a bench</h2></div><span class="quiet">4 interactive tools</span></div><div class="lab-grid">
+<article class="card lab-card"><div class="icon">〰</div><h3>Wave &amp; Tone</h3><p>Change frequency and amplitude and observe a live wave.</p><button class="text-button" data-open-lab="wave">Explore wave lab →</button></article>
+<article class="card lab-card"><div class="icon">◉</div><h3>Orbit Bench</h3><p>Explore how orbital speed changes with radius in a simple model.</p><button class="text-button" data-open-lab="orbit">Explore orbit lab →</button></article>
+<article class="card lab-card"><div class="icon">◈</div><h3>Matter &amp; Density</h3><p>Adjust mass and volume to calculate density with clear units.</p><button class="text-button" data-open-lab="matter">Explore matter lab →</button></article>
+<article class="card lab-card"><div class="icon">⌘</div><h3>Pattern Forge</h3><p>Inspect a numeric sequence and compare summary statistics.</p><button class="text-button" data-open-lab="pattern">Explore patterns →</button></article></div><p class="notice">Educational models only; not instruments or professional scientific, medical, or engineering advice.</p></section>
+<section class="view hidden" id="view-labs"><div class="section-heading"><div><p class="eyebrow">INTERACTIVE WORKBENCH</p><h2>Choose an experiment</h2></div></div><div class="lab-grid">
+<article class="card lab-card"><div class="icon">〰</div><h3>Wave &amp; Tone</h3><p>Frequency, amplitude, and a live wave visualization.</p><button class="primary" data-open-lab="wave">Open bench</button></article>
+<article class="card lab-card"><div class="icon">◉</div><h3>Orbit Bench</h3><p>A simplified circular-orbit relationship.</p><button class="primary" data-open-lab="orbit">Open bench</button></article>
+<article class="card lab-card"><div class="icon">◈</div><h3>Matter &amp; Density</h3><p>Mass divided by volume.</p><button class="primary" data-open-lab="matter">Open bench</button></article>
+<article class="card lab-card"><div class="icon">⌘</div><h3>Pattern Forge</h3><p>Analyze a comma-separated numeric sequence.</p><button class="primary" data-open-lab="pattern">Open bench</button></article></div></section>
+<section class="view hidden" id="view-saved"><div class="section-heading"><div><p class="eyebrow">YOUR LOCAL NOTEBOOK</p><h2>Saved experiments</h2></div><button id="clear-saved" class="secondary">Clear all</button></div><div id="saved-list" class="saved-list"></div><p id="saved-empty" class="empty-state">Nothing saved yet. Run a lab and choose “Save result” to keep a local note.</p></section>
+<section class="view hidden" id="view-lab"><button id="back-to-labs" class="back-button">← Back to labs</button><div id="lab-content"></div></section>
+<p id="status" class="status" role="status" aria-live="polite"></p></main>
+<footer><span>MAKER ARCADE · LOCAL FIRST</span><span>Experiments stay on this device.</span></footer>
+<script src="cordova.js"></script><script src="js/app.js"></script>
+</body></html>
