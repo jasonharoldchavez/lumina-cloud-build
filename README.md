@@ -72,3 +72,6 @@ the product name.
 - No encryption is applied to local saved summaries.
 - Do not store secrets, credentials, or sensitive personal information in the
   local notebook.
+- The current `npm ci` run reports 8 high-severity dependency advisories. They
+  have not yet been triaged or remediated. Review `npm audit` output and update
+  affected dependencies before treating this prototype as a production release.
