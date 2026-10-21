@@ -132,7 +132,7 @@
     }
   }
 
-  document.addEventListener("click", event => {
+  if (typeof document === "undefined") {\n    if (typeof module !== "undefined" && module.exports) module.exports = { parseSequence, density, circularOrbitSpeed, wavePoints };\n    return;\n  }\n\n  document.addEventListener("click", event => {
     const tab = event.target.closest("[data-view]");
     if (tab) { switchView(tab.dataset.view); setStatus(""); return; }
     const go = event.target.closest("[data-go]");
