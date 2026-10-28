@@ -35,12 +35,20 @@ jobs:
 
       - name: Check JavaScript syntax and required app files
         run: |
+          set -eu
           node --check www/js/app.js
           test -s www/index.html
           test -s www/css/index.css
           grep -q "Maker Arcade" www/index.html
           grep -q "js/app.js" www/index.html
           grep -q "connect-src 'none'" www/index.html
+          for lab in wave orbit matter pattern; do
+            grep -q "data-open-lab=\"$lab\"" www/index.html
+          done
+          if grep -Eq '<allow-intent[^>]+href="https?://' config.xml; then
+            echo "Unexpected external navigation intent in Cordova config; review before build."
+            exit 1
+          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -50,12 +58,14 @@ jobs:
 
       - name: Accept Android SDK licenses
         run: |
+          set -eu
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
           test -n "$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses
 
       - name: Install Android SDK components
         run: |
+          set -eu
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
           test -n "$SDKMANAGER"
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
@@ -65,13 +75,41 @@ jobs:
 
       - name: Build debug APK
         run: |
+          set -eu
           cd platforms/android
           chmod +x tools/gradlew
           ./tools/gradlew assembleDebug
 
-      - name: Upload debug APK
+      - name: Verify APK and write build provenance
+        run: |
+          set -eu
+          APK="platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
+          test -x "$AAPT"
+          "$AAPT" dump badging "$APK" | grep -F "package: name='com.lumina.rei'"
+          mkdir -p build-metadata
+          sha256sum "$APK" > build-metadata/app-debug.apk.sha256
+          {
+            echo "artifact=app-debug.apk"
+            echo "commit=$GITHUB_SHA"
+            echo "ref=$GITHUB_REF"
+            echo "workflow_run_id=$GITHUB_RUN_ID"
+            echo "build_type=debug"
+            echo "package_id=com.lumina.rei"
+            echo "target_sdk_build_platform=35"
+            echo "release_ready=false"
+            echo "note=Debug/test artifact only; physical-device verification and API 36 migration remain release gates."
+          } > build-metadata/build-info.txt
+          cat build-metadata/build-info.txt
+          cat build-metadata/app-debug.apk.sha256
+
+      - name: Upload debug APK and provenance
         uses: actions/upload-artifact@v4
         with:
           name: maker-arcade-debug-apk
-          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            platforms/android/app/build/outputs/apk/debug/app-debug.apk
+            build-metadata/build-info.txt
+            build-metadata/app-debug.apk.sha256
           if-no-files-found: error
