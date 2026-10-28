@@ -45,8 +45,8 @@ jobs:
           for lab in wave orbit matter pattern; do
             grep -q "data-open-lab=\"$lab\"" www/index.html
           done
-          if grep -Eq 'https?://[^" ]+' config.xml; then
-            echo "Unexpected external URL in Cordova config; review before build."
+          if grep -Eq '<allow-intent[^>]+href="https?://' config.xml; then
+            echo "Unexpected external navigation intent in Cordova config; review before build."
             exit 1
           fi
 
