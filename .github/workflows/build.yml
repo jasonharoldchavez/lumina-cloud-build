@@ -7,6 +7,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+concurrency:
+  group: maker-arcade-build-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -15,14 +19,34 @@ env:
   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
 jobs:
-  test-and-build:
+  dependency-security-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install locked Node dependencies
+        run: npm ci
+
+      - name: Fail on high or critical npm advisories
+        run: npm audit --audit-level=high
+
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "20"
           cache: npm
@@ -34,28 +58,45 @@ jobs:
         run: npm test
 
       - name: Check JavaScript syntax and required app files
+        shell: bash
         run: |
+          set -euo pipefail
           node --check www/js/app.js
           test -s www/index.html
           test -s www/css/index.css
+          test -s config.xml
           grep -q "Maker Arcade" www/index.html
           grep -q "js/app.js" www/index.html
           grep -q "connect-src 'none'" www/index.html
+          for lab in wave orbit matter pattern; do
+            grep -q "data-open-lab=\"$lab\"" www/index.html
+          done
+          if grep -Eq '<allow-intent[^>]+href="https?://' config.xml; then
+            echo "Unexpected external navigation intent in Cordova config; review before build."
+            exit 1
+          fi
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # pinned commit
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Accept Android SDK licenses
+        shell: bash
         run: |
+          set -eu
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
           test -n "$SDKMANAGER"
+          # sdkmanager may close stdin immediately after accepting all licenses.
+          # Ignore SIGPIPE from "yes", but preserve sdkmanager's exit status.
+          set +o pipefail
           yes | "$SDKMANAGER" --licenses
 
       - name: Install Android SDK components
+        shell: bash
         run: |
+          set -euo pipefail
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
           test -n "$SDKMANAGER"
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
@@ -64,14 +105,46 @@ jobs:
         run: npx cordova prepare android
 
       - name: Build debug APK
+        shell: bash
         run: |
+          set -euo pipefail
           cd platforms/android
           chmod +x tools/gradlew
           ./tools/gradlew assembleDebug
 
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
+      - name: Verify APK and write build provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
+          test -x "$AAPT"
+          BADGING="$("$AAPT" dump badging "$APK")"
+          printf '%s\n' "$BADGING" | grep -F "package: name='com.lumina.rei'"
+          mkdir -p build-metadata
+          sha256sum "$APK" > build-metadata/app-debug.apk.sha256
+          {
+            echo "artifact=app-debug.apk"
+            echo "commit=$GITHUB_SHA"
+            echo "ref=$GITHUB_REF"
+            echo "workflow_run_id=$GITHUB_RUN_ID"
+            echo "build_type=debug"
+            echo "package_id=com.lumina.rei"
+            echo "target_sdk_build_platform=35"
+            echo "release_ready=false"
+            echo "note=Debug/test artifact only; physical-device verification and API 36 migration remain release gates."
+          } > build-metadata/build-info.txt
+          cat build-metadata/build-info.txt
+          cat build-metadata/app-debug.apk.sha256
+
+      - name: Upload debug APK and provenance
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: maker-arcade-debug-apk
-          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            platforms/android/app/build/outputs/apk/debug/app-debug.apk
+            build-metadata/build-info.txt
+            build-metadata/app-debug.apk.sha256
           if-no-files-found: error
+          retention-days: 30
