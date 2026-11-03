@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.0.1
         with:
           node-version: "20"
           cache: npm
@@ -88,6 +88,9 @@ jobs:
           set -eu
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
           test -n "$SDKMANAGER"
+          # sdkmanager may close stdin immediately after accepting all licenses.
+          # Ignore SIGPIPE from "yes", but preserve sdkmanager's exit status.
+          set +o pipefail
           yes | "$SDKMANAGER" --licenses
 
       - name: Install Android SDK components
