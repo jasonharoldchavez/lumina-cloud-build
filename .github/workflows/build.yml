@@ -2,7 +2,7 @@ name: Maker Arcade Android Build
 
 on:
   push:
-    branches: ["main", "feat/maker-arcade-offline-mvp"]
+    branches: ["main", "feat/maker-arcade-offline-mvp", "feature/living-memory-archive-foundation"]
   pull_request:
     branches: ["main"]
   workflow_dispatch:
@@ -36,6 +36,13 @@ jobs:
       - name: Check JavaScript syntax and required app files
         run: |
           node --check www/js/app.js
+          node --check www/js/perspectives.js
+          node --check www/js/timeline.js
+          node --check www/js/geography.js
+          node --check www/js/elements-data.js
+          node --check www/js/elements.js
+          test -s www/js/elements-data.js
+          test -s data/ELEMENT-DATA-ATTRIBUTION.md
           test -s www/index.html
           test -s www/css/index.css
           grep -q "Maker Arcade" www/index.html
