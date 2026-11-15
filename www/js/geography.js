@@ -29,6 +29,6 @@ const detail=document.createElement("p");detail.className="draft-meta";detail.te
 card.append(h,ev,detail);card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Highlight "+p.name+" on schematic map");const select=()=>{svg.querySelectorAll(".map-point").forEach(point=>point.classList.toggle("selected",point.getAttribute("aria-label").startsWith(p.name+", ")));list.querySelectorAll(".place-card").forEach(item=>item.classList.toggle("selected",item===card))};card.addEventListener("click",select);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select()}});list.append(card);
 });
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render);else render();
+if(typeof document!=="undefined"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render);else render();}
 if(typeof module!=="undefined"&&module.exports)module.exports={places,project};
 })();
