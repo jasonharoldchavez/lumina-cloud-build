@@ -16,4 +16,5 @@ jobs:
       - run: node --check www/js/perspectives.js
       - run: node --check www/js/timeline.js
       - run: node --check www/js/geography.js
+      - run: node --check www/js/elements.js
       - run: npm test
