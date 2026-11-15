@@ -38,7 +38,8 @@
       const sources=document.createElement("div");sources.className="source-list";
       const strong=document.createElement("strong");strong.textContent="Sources";sources.append(strong);
       e.sources.forEach(s=>{const a=document.createElement("a");a.href=s.url;a.target="_blank";a.rel="noopener noreferrer";a.textContent=s.label;sources.append(a)});
-      card.append(date,h,place,summary,people,certainty,sources);root.append(card);
+      const locate=document.createElement("button");locate.type="button";locate.className="secondary timeline-locate";locate.textContent="Locate on historical places map";locate.addEventListener("click",()=>{document.dispatchEvent(new CustomEvent("living-atlas:focus-place",{detail:{id:e.id}}));});
+      card.append(date,h,place,summary,people,certainty,sources,locate);root.append(card);
     });
   }
   validate(entries);
