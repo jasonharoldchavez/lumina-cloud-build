@@ -22,6 +22,7 @@ function render(){
  const grid=document.getElementById("element-grid"),detail=document.getElementById("element-detail"),
  search=document.getElementById("element-search"),filter=document.getElementById("element-category");
  if(!grid||!detail||!search)return;
+ if(filter&&filter.options.length===1){[...new Set(elements.map(e=>e.category).filter(Boolean))].sort().forEach(category=>{const option=document.createElement("option");option.value=category;option.textContent=category.replace(/-/g," ");filter.append(option)})}
  const q=search.value.trim().toLowerCase(),cat=filter?filter.value:"all";
  const filtered=elements.filter(e=>(cat==="all"||e.category===cat)&&[e.name,e.s,e.category,String(e.z),e.discoveredBy||"",e.discoveryLocation||""].join(" ").toLowerCase().includes(q));
  grid.replaceChildren();
