@@ -20,14 +20,17 @@ places.forEach(p=>{
 const xy=project(p.lat,p.lon),g=make("g",{class:"map-point",tabindex:"0",role:"button","aria-label":p.name+", "+p.country+": "+p.event});
 const circle=make("circle",{cx:xy.x,cy:xy.y,r:8});const title=make("title");title.textContent=p.name+" — "+p.event;circle.append(title);g.append(circle);
 const label=make("text",{x:xy.x+11,y:xy.y-9});label.textContent=p.name;g.append(label);
-const activate=()=>{document.querySelectorAll(".place-card").forEach(c=>c.classList.toggle("selected",c.dataset.id===p.id));const card=list.querySelector('[data-id="'+p.id+'"]');if(card)card.scrollIntoView({behavior:"smooth",block:"nearest"})};
+const activate=()=>selectPlace(p.id,true);
 g.addEventListener("click",activate);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}});svg.append(g);
 const card=document.createElement("article");card.className="card place-card";card.dataset.id=p.id;
 const h=document.createElement("h3");h.textContent=p.name+" — "+p.country;
 const ev=document.createElement("p");ev.textContent=p.event;
 const detail=document.createElement("p");detail.className="draft-meta";detail.textContent=p.precision+" Coordinates: "+p.lat.toFixed(3)+", "+p.lon.toFixed(3)+".";
-card.append(h,ev,detail);card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Highlight "+p.name+" on schematic map");const select=()=>{svg.querySelectorAll(".map-point").forEach(point=>point.classList.toggle("selected",point.getAttribute("aria-label").startsWith(p.name+", ")));list.querySelectorAll(".place-card").forEach(item=>item.classList.toggle("selected",item===card))};card.addEventListener("click",select);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select()}});list.append(card);
+card.append(h,ev,detail);card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Highlight "+p.name+" on schematic map");const select=()=>selectPlace(p.id,false);card.addEventListener("click",select);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select()}});list.append(card);
 });
+function selectPlace(id,scrollToCard){const place=places.find(p=>p.id===id);if(!place)return false;svg.querySelectorAll(".map-point").forEach(point=>point.classList.toggle("selected",point.getAttribute("aria-label").startsWith(place.name+", ")));list.querySelectorAll(".place-card").forEach(item=>item.classList.toggle("selected",item.dataset.id===id));const card=list.querySelector('[data-id="'+id+'"]');if(scrollToCard&&card){document.getElementById("history-map").scrollIntoView({behavior:"smooth",block:"center"});card.scrollIntoView({behavior:"smooth",block:"nearest"})}return true;}
+document.addEventListener("living-atlas:focus-place",event=>{if(event.detail&&typeof event.detail.id==="string")selectPlace(event.detail.id,true)});
+
 }
 if(typeof document!=="undefined"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render);else render();}
 if(typeof module!=="undefined"&&module.exports)module.exports={places,project};
