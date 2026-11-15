@@ -26,7 +26,7 @@ const card=document.createElement("article");card.className="card place-card";ca
 const h=document.createElement("h3");h.textContent=p.name+" — "+p.country;
 const ev=document.createElement("p");ev.textContent=p.event;
 const detail=document.createElement("p");detail.className="draft-meta";detail.textContent=p.precision+" Coordinates: "+p.lat.toFixed(3)+", "+p.lon.toFixed(3)+".";
-card.append(h,ev,detail);list.append(card);
+card.append(h,ev,detail);card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Highlight "+p.name+" on schematic map");const select=()=>{svg.querySelectorAll(".map-point").forEach(point=>point.classList.toggle("selected",point.getAttribute("aria-label").startsWith(p.name+", ")));list.querySelectorAll(".place-card").forEach(item=>item.classList.toggle("selected",item===card))};card.addEventListener("click",select);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select()}});list.append(card);
 });
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render);else render();
