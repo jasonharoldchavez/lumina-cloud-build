@@ -2,7 +2,7 @@ name: Maker Arcade Android Build
 
 on:
   push:
-    branches: ["main", "feat/maker-arcade-offline-mvp"]
+    branches: ["main", "feat/maker-arcade-offline-mvp", "feature/living-atlas-chronoquest-v071"]
   pull_request:
     branches: ["main"]
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
       - name: Install locked Node dependencies
         run: npm ci
 
-      - name: Run lab calculation tests
+      - name: Run JavaScript regression tests
         run: npm test
 
       - name: Check JavaScript syntax and required app files
@@ -39,7 +39,8 @@ jobs:
           test -s www/index.html
           test -s www/css/index.css
           grep -q "Maker Arcade" www/index.html
-          grep -q "js/app.js" www/index.html
+          grep -q "const QUESTS" www/index.html
+          grep -q "const TIMELINE" www/index.html
           grep -q "connect-src 'none'" www/index.html
 
       - name: Set up Java
