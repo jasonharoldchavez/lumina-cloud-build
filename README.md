@@ -1,77 +1,26 @@
-# Maker Arcade — Living Atlas (local prototype)
+# Maker Arcade + Living Atlas — ChronoQuest candidate v0.7.1
 
-**Make something. Keep it. Then explore how the world works.**
+This candidate restores the saved **Living Atlas Integrated Intelligence Workbench v0.7.0** as the product base, rather than narrowing the experience to the four-lab prototype. The original creative canvas, research surfaces and seven core application modules are preserved within the single-file local-first app.
 
-This repository contains the Cordova Android container and the first local-first
-Maker Arcade prototype. It is a small, honest foundation for the broader Living
-Atlas concept—not a claim that all previously discussed labs, 44 fields, or the
-Integrated Research workbench have already been integrated.
+## Added in this candidate
 
-## Included in this prototype
+- **ChronoQuest:** 44 curated, category-matched mini-missions covering every World Library field across 11 collections. Each mission has four answer choices and an explanatory response. Answer order is shuffled on each play.
+- **Field-level launch:** every field brief includes a button that starts its matching quest.
+- **Timeways:** a 14-milestone, source-linked science-and-technology chronology from Euclid to the 2012 Higgs-boson announcement, with period filters and an oldest-to-newest ordering challenge.
+- **Local progress:** completed missions and points are stored in browser local storage only. No network ingestion, accounts, leaderboards, cameras, microphones, location, or background observation are used by the new game layer.
+- **Single-file local edition:** the app is self-contained at `www/index.html`; the Render static site can continue publishing the `www` directory.
 
-- **Wave & Tone:** adjustable sine-wave frequency and amplitude visualization.
-- **Orbit Bench:** circular orbital speed from the Newtonian approximation
-  `v = sqrt(GM/r)`.
-- **Matter & Density:** mass divided by volume, with input validation.
-- **Pattern Forge:** descriptive statistics for a finite comma-separated
-  numeric sequence.
-- **Saved work:** stores short experiment summaries in local device storage.
-- **Local-first behavior:** no account, camera, network service, or external
-  runtime dependency is required by the current labs.
+## Existing Living Atlas capabilities preserved
 
-All results are educational models. They are not professional scientific,
-medical, engineering, or safety advice.
+The v0.7.0 base includes the Maker Arcade art canvas, 44-field World Library, interactive science benches, Integrated Intelligence Workbench, Multidimensional Synthesis, Pattern Forge, Equation Studio, Coupled Resonance Lab, connected knowledge graph, cultural motifs/history catalog, dataset/reference catalog, Synthesis Foundry, research notebook and exports. These remain distinct modules; the page does not claim to execute external ASIE, INN, Neotropic or Lumen runtimes without an explicit tested adapter.
 
-## Development
+## Verification
 
-Requirements: Node.js 20, npm, Java 17, and Android SDK platform/build-tools 35
-for the Android build.
+- JavaScript syntax checks passed for all seven preserved core scripts and ChronoQuest before bundling.
+- Three Node tests passed locally, covering 44 field missions, the 14 chronological source-linked milestones, and local progress configuration.
+- Static HTML checks found no duplicate element IDs and confirmed the page has no external script or stylesheet dependencies.
+- A matching repository test is included to run in GitHub Actions.
 
-Install and run the lab calculation tests:
+## Release status and limitations
 
-```bash
-npm ci
-npm test
-node --check www/js/app.js
-```
-
-Prepare and build a debug APK:
-
-```bash
-npx cordova prepare android
-cd platforms/android
-./tools/gradlew assembleDebug
-```
-
-The APK output is
-`platforms/android/app/build/outputs/apk/debug/app-debug.apk`.
-
-GitHub Actions runs the Node tests, checks source files, prepares Cordova, builds
-a debug APK, and uploads that APK as the `maker-arcade-debug-apk` workflow
-artifact. A debug APK is for installation/testing, not a signed Play Store
-release.
-
-## Project status and next integration steps
-
-The canonical source for the Cordova web app is `www/`. Do not edit generated
-`platforms/android/app/src/main/assets/www/` files directly; run
-`cordova prepare android` after source changes.
-
-This prototype currently includes four working lab calculations and a local
-save list. The broader product plan still includes additional fields and labs,
-the Integrated Research workbench, accessibility and device testing, broader
-browser tests, packaging/signing, licensing review, and release validation.
-Those features should be added as verified increments rather than implied by
-the product name.
-
-## Security and privacy notes
-
-- The current content-security policy blocks network connections from the app.
-- Saved summaries remain in this device's browser storage until cleared or
-  app data is removed.
-- No encryption is applied to local saved summaries.
-- Do not store secrets, credentials, or sensitive personal information in the
-  local notebook.
-- The current `npm ci` run reports 8 high-severity dependency advisories. They
-  have not yet been triaged or remediated. Review `npm audit` output and update
-  affected dependencies before treating this prototype as a production release.
+This is a **candidate, not a public release**. Physical Android installation, cross-browser/device testing, accessibility review, dependency advisory triage, legal/licensing review, release signing and final release validation remain outstanding. The deployed `main` branch is unchanged by this feature branch until the pull request is reviewed and merged.
