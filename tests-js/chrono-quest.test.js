@@ -16,7 +16,7 @@ function extractJson(startMarker, endMarker, label) {
 
 const quests = extractJson("const QUESTS = ", ";\n  const TIMELINE =", "ChronoQuest");
 const timeline = extractJson("const TIMELINE = ", ";\n  const GROUPS =", "Timeways");
-const fieldIds = [...html.matchAll(new RegExp("\\\\{id:'([^']+)',title:", "g"))].map(match => match[1]);
+const fieldIds = [...html.matchAll(new RegExp("\\{id:'([^']+)',title:", "g"))].map(match => match[1]);
 
 test("every Living Atlas field has a category-tailored mission", () => {
   assert.equal(fieldIds.length, 44);
