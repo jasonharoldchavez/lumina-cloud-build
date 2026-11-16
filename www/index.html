@@ -1789,8 +1789,10 @@ runBayes();runLinear();runLag();runTopo();
     timelineChosen=[];timelineFinished=false;
     const choices=$('twGameChoices');if(!choices)return;
     choices.replaceChildren();
-    // A deliberately shuffled, fixed order keeps the same challenge reproducible and offline.
-    ['web','faraday','copernicus','newton'].forEach(id=>{
+    // Shuffle the same four known milestones on each round; chronology is still checked against their actual years.
+    const shuffled=['web','faraday','copernicus','newton'];
+    for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+    shuffled.forEach(id=>{
       const item=TIMELINE.find(e=>e.id===id);const b=doc.createElement('button');b.type='button';b.className='tw-choice';b.textContent=item.title;b.dataset.timeEvent=id;b.addEventListener('click',()=>chooseTimelineEvent(id,b));choices.appendChild(b);
     });
     const status=$('twGameStatus');if(status)status.textContent='Tap the earliest milestone first, then continue toward the latest.';
