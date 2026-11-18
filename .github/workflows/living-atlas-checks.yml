@@ -1,0 +1,21 @@
+name: Living Atlas feature checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, "feature/living-memory-archive-foundation"]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check www/js/app.js
+      - run: node --check www/js/perspectives.js
+      - run: node --check www/js/timeline.js
+      - run: node --check www/js/geography.js
+      - run: node --check www/js/elements-data.js
+      - run: node --check www/js/elements.js
+      - run: npm test

@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://living-atlas.invalid/schemas/historical-contribution.schema.json",
+  "title": "Living Atlas historical contribution",
+  "description": "A structured record for a historical perspective. This schema does not itself verify factual claims or authorize publication.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "body",
+    "evidence_type",
+    "provenance_note",
+    "attribution",
+    "created_at",
+    "publication_state",
+    "consent"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30000
+    },
+    "evidence_type": {
+      "enum": [
+        "documented_history",
+        "personal_testimony",
+        "family_community_memory",
+        "interpretation",
+        "disputed_account"
+      ]
+    },
+    "provenance_note": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "named",
+            "pseudonymous",
+            "anonymous"
+          ]
+        },
+        "display_name": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "named"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "display_name"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "pseudonymous"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "display_name"
+            ]
+          }
+        }
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "publication_state": {
+      "enum": [
+        "private_draft",
+        "pending_review",
+        "approved",
+        "rejected",
+        "withdrawn"
+      ]
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "author_confirms_right_to_submit",
+        "author_confirms_publication_choice"
+      ],
+      "properties": {
+        "author_confirms_right_to_submit": {
+          "type": "boolean",
+          "const": true
+        },
+        "author_confirms_publication_choice": {
+          "type": "boolean",
+          "const": true
+        },
+        "media_permissions_confirmed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "end": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "precision": {
+          "enum": [
+            "exact",
+            "approximate",
+            "range",
+            "unknown",
+            "disputed"
+          ]
+        },
+        "display_note": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "precision": {
+          "enum": [
+            "exact",
+            "approximate",
+            "region",
+            "unknown",
+            "disputed"
+          ]
+        }
+      }
+    },
+    "event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "uniqueItems": true,
+      "maxItems": 30
+    },
+    "perspective_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 60
+      },
+      "uniqueItems": true,
+      "maxItems": 20
+    },
+    "sources": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "description"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "primary_document",
+              "secondary_source",
+              "oral_history",
+              "family_record",
+              "artifact",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000
+          },
+          "citation": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "rights_note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "related_contribution_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "uniqueItems": true,
+      "maxItems": 50
+    },
+    "editorial_note": {
+      "type": "string",
+      "maxLength": 3000
+    },
+    "revision_of": {
+      "type": "string",
+      "maxLength": 100
+    }
+  }
+}
