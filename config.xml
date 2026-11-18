@@ -5,7 +5,4 @@
         Local-first interactive science and creativity prototype.
     </description>
     <author>Jason Harold Chavez</author>
-    <content src="index.html" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
-</widget>
+    <content src="index.html" />\n\n</widget>
