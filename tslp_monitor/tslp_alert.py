@@ -1,35 +1,56 @@
 #!/usr/bin/env python3
-import smtplib
+"""Send a TSLP alert using credentials supplied only through environment variables."""
 import json
+import os
+import smtplib
 from pathlib import Path
 from email.mime.text import MIMEText
 
-# Path to your report JSON
-report_path = Path.home() / "downloads" / "atlas_project" / "out" / "report_demo01.json"
-report = json.loads(report_path.read_text())
+# Optional override; defaults to the existing local demo report location.
+report_path = Path(
+    os.environ.get(
+        "TSLP_REPORT_PATH",
+        str(Path.home() / "downloads" / "atlas_project" / "out" / "report_demo01.json"),
+    )
+)
+report = json.loads(report_path.read_text(encoding="utf-8"))
 score = report["alignment_score"]
 
-# --------- CONFIGURE THIS ---------
-YOUR_EMAIL = "your_email@gmail.com"
-YOUR_APP_PASSWORD = "your_app_password_here"
-# ----------------------------------
 
 def send_alert(score):
-    subject = "TSLP ALERT — Critical Status"
-    body = f"Your project score dropped to {score}. Check dashboard immediately."
+    sender = os.environ.get("GMAIL_SENDER")
+    recipient = os.environ.get("TSLP_ALERT_RECIPIENT")
+    app_password = os.environ.get("GMAIL_APP_PASSWORD")
 
-    msg = MIMEText(body)
-    msg["From"] = YOUR_EMAIL
-    msg["To"] = YOUR_EMAIL
-    msg["Subject"] = subject
+    missing = [
+        name
+        for name, value in (
+            ("GMAIL_SENDER", sender),
+            ("TSLP_ALERT_RECIPIENT", recipient),
+            ("GMAIL_APP_PASSWORD", app_password),
+        )
+        if not value
+    ]
+    if missing:
+        raise RuntimeError(
+            "Email alert not sent; missing environment variable(s): "
+            + ", ".join(missing)
+        )
 
-    # Gmail secure SMTP
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(YOUR_EMAIL, YOUR_APP_PASSWORD)
-        server.sendmail(YOUR_EMAIL, YOUR_EMAIL, msg.as_string())
+    msg = MIMEText(
+        f"Your project score dropped to {score}. Check dashboard immediately."
+    )
+    msg["From"] = sender
+    msg["To"] = recipient
+    msg["Subject"] = "TSLP ALERT — Critical Status"
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as server:
+        server.login(sender, app_password)
+        server.sendmail(sender, [recipient], msg.as_string())
+
 
 if score < 60:
     send_alert(score)
-    print("Alert sent!")
+    print("Alert sent.")
 else:
     print("No alert needed.")
