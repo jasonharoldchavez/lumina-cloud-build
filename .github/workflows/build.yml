@@ -48,9 +48,6 @@ jobs:
           set -u
           npm audit fix --package-lock-only --ignore-scripts || true
 
-      - name: Fail on high or critical npm advisories
-        run: npm audit --audit-level=high
-
       - name: Commit verified dependency lockfile remediation
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/cloud-build-artifact-validation' }}
         shell: bash
@@ -65,6 +62,10 @@ jobs:
           git add package-lock.json
           git commit -m "fix(deps): remediate high-severity npm advisories"
           git push origin "HEAD:${GITHUB_HEAD_REF}"
+
+
+      - name: Fail on high or critical npm advisories
+        run: npm audit --audit-level=high
 
   test-and-build:
     needs: dependency-security-audit
