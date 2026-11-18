@@ -184,7 +184,14 @@ def main():
         return
 
     if cmd == "daemon":
-        interval = int(sys.argv[2]) if len(sys.argv) >= 3 else 10
+        try:
+            interval = int(sys.argv[2]) if len(sys.argv) >= 3 else 10
+        except ValueError:
+            print("Daemon interval must be an integer number of seconds.")
+            return
+        if not 5 <= interval <= 3600:
+            print("Daemon interval must be between 5 and 3600 seconds.")
+            return
         append_log(f"[{now_ts()}] DAEMON_STARTED interval={interval}s")
         try:
             while True:
