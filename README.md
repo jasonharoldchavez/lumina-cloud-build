@@ -80,7 +80,9 @@ claiming Play readiness. This branch does not pretend that migration is complete
 - No encryption is applied to local saved summaries.
 - Do not store secrets, credentials, or sensitive personal information in the
   local notebook.
-- The latest documented `npm ci` run reported eight high-severity dependency
-  advisories. These require a fresh audit and triage; this change does not
-  claim to remediate them.
+- The GitHub Actions run on 2026-11-18 completed `npm ci` and
+  `npm audit --audit-level=high` with zero known npm vulnerabilities reported
+  at audit time. This is a point-in-time dependency check, not a guarantee
+  against undisclosed or newly published vulnerabilities. Continue scheduled
+  Dependabot updates and rerun the audit before releases.
 
